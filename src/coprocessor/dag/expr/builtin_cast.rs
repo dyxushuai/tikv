@@ -12,7 +12,7 @@
 // limitations under the License.
 
 use std::borrow::Cow;
-use std::{str, i64, u64};
+use std::{i64, str, u64};
 
 use coprocessor::codec::convert::{self, convert_float_to_int, convert_float_to_uint};
 use coprocessor::codec::mysql::decimal::RoundMode;
@@ -87,10 +87,9 @@ impl FnCall {
 
         match res {
             Ok(v) => Ok(Some(v)),
-            Err(CError::Overflow(data, range)) => {
-                ctx.overflow_from_cast_str_as_int(&val, Error::overflow(&data, &range), is_negative)
-                    .map(Some)
-            }
+            Err(CError::Overflow(data, range)) => ctx
+                .overflow_from_cast_str_as_int(&val, Error::overflow(&data, &range), is_negative)
+                .map(Some),
             Err(e) => Err(e.into()),
         }
     }
@@ -98,7 +97,8 @@ impl FnCall {
     pub fn cast_time_as_int(&self, ctx: &mut EvalContext, row: &[Datum]) -> Result<Option<i64>> {
         let val = try_opt!(self.children[0].eval_time(ctx, row));
         let dec = val.to_decimal()?;
-        let dec = dec.round(mysql::DEFAULT_FSP as i8, RoundMode::HalfEven)
+        let dec = dec
+            .round(mysql::DEFAULT_FSP as i8, RoundMode::HalfEven)
             .unwrap();
         let res = dec.as_i64().unwrap();
         Ok(Some(res))
@@ -111,7 +111,8 @@ impl FnCall {
     ) -> Result<Option<i64>> {
         let val = try_opt!(self.children[0].eval_duration(ctx, row));
         let dec = val.to_decimal()?;
-        let dec = dec.round(mysql::DEFAULT_FSP as i8, RoundMode::HalfEven)
+        let dec = dec
+            .round(mysql::DEFAULT_FSP as i8, RoundMode::HalfEven)
             .unwrap();
         let res = dec.as_i64().unwrap();
         Ok(Some(res))
@@ -129,10 +130,9 @@ impl FnCall {
             Ok(Some(self.produce_float_with_specified_tp(ctx, val as f64)?))
         } else {
             let uval = val as u64;
-            Ok(Some(self.produce_float_with_specified_tp(
-                ctx,
-                uval as f64,
-            )?))
+            Ok(Some(
+                self.produce_float_with_specified_tp(ctx, uval as f64)?,
+            ))
         }
     }
 
@@ -710,8 +710,9 @@ mod test {
     use coprocessor::codec::mysql::{self, charset, types, Decimal, Duration, Json, Time};
     use coprocessor::codec::{convert, Datum};
     use coprocessor::dag::expr::test::{col_expr as base_col_expr, fncall_expr};
-    use coprocessor::dag::expr::{self, err, EvalConfig, EvalContext, Expression,
-                                 FLAG_IGNORE_TRUNCATE};
+    use coprocessor::dag::expr::{
+        self, err, EvalConfig, EvalContext, Expression, FLAG_IGNORE_TRUNCATE,
+    };
 
     pub fn col_expr(col_id: i64, tp: i32) -> Expr {
         let mut expr = base_col_expr(col_id);
@@ -1815,16 +1816,16 @@ mod test {
         let cases = vec![
             (
                 0,
-                vec![
-                    Datum::Dec(Decimal::from_f64(i64::MAX as f64 + 100.5).unwrap()),
-                ],
+                vec![Datum::Dec(
+                    Decimal::from_f64(i64::MAX as f64 + 100.5).unwrap(),
+                )],
                 i64::MAX,
             ),
             (
                 types::UNSIGNED_FLAG,
-                vec![
-                    Datum::Dec(Decimal::from_f64(u64::MAX as f64 + 100.5).unwrap()),
-                ],
+                vec![Datum::Dec(
+                    Decimal::from_f64(u64::MAX as f64 + 100.5).unwrap(),
+                )],
                 u64::MAX as i64,
             ),
         ];

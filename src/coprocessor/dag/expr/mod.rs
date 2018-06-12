@@ -32,8 +32,8 @@ use std::str;
 
 use tipb::expression::{Expr, ExprType, FieldType, ScalarFuncSig};
 
-use coprocessor::codec::mysql::{Decimal, Duration, Json, Time, MAX_FSP};
 use coprocessor::codec::mysql::{charset, types};
+use coprocessor::codec::mysql::{Decimal, Duration, Json, Time, MAX_FSP};
 use coprocessor::codec::{self, Datum};
 use util::codec::number;
 
@@ -299,10 +299,14 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::{Error, EvalConfig, EvalContext, Expression, ERR_DATA_OUT_OF_RANGE,
-                ERR_DIVISION_BY_ZERO, FLAG_IGNORE_TRUNCATE};
+    use super::{
+        Error, EvalConfig, EvalContext, Expression, ERR_DATA_OUT_OF_RANGE, ERR_DIVISION_BY_ZERO,
+        FLAG_IGNORE_TRUNCATE,
+    };
     use coprocessor::codec::mysql::json::JsonEncoder;
-    use coprocessor::codec::mysql::{charset, types, Decimal, DecimalEncoder, Duration, Json, Time};
+    use coprocessor::codec::mysql::{
+        charset, types, Decimal, DecimalEncoder, Duration, Json, Time,
+    };
     use coprocessor::codec::{convert, mysql, Datum};
     use std::sync::Arc;
     use std::{i64, u64};

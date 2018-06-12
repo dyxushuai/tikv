@@ -12,8 +12,8 @@
 // limitations under the License.
 
 use super::{Error, EvalContext, FnCall, Result};
-use coprocessor::codec::Datum;
 use coprocessor::codec::mysql::Decimal;
+use coprocessor::codec::Datum;
 use std::borrow::Cow;
 use std::i64;
 
